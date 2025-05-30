@@ -1,23 +1,16 @@
 FROM eclipse-temurin:21-jdk-jammy
 
-# Create and set working directory
-RUN mkdir -p /app/backend
-WORKDIR /app/backend
+# Set working directory
+WORKDIR /app
 
-# Copy only the necessary files first for better caching
-COPY backend/mvnw .
-COPY backend/.mvn .mvn
-COPY backend/pom.xml .
+# Copy the entire backend directory
+COPY backend .
 
-# Make mvnw executable and download dependencies
-RUN chmod +x mvnw && \
-    ./mvnw dependency:go-offline
-
-# Copy the rest of the application
-COPY backend/src src/
+# Make mvnw executable
+RUN chmod +x mvnw
 
 # Build the application
-RUN ./mvnw package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 # Run the application
-ENTRYPOINT ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"] 
+ENTRYPOINT java -jar target/backend-0.0.1-SNAPSHOT.jar 
