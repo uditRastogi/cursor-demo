@@ -18,5 +18,8 @@ RUN cd backend && \
     chmod +x mvnw && \
     ./mvnw clean package -DskipTests
 
+# Set the working directory to backend
+WORKDIR /app/backend
+
 # Run the application
-CMD ["sh", "-c", "cd backend && java -jar target/*.jar"] 
+CMD ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"] 
