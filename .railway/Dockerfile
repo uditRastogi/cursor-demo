@@ -1,26 +1,23 @@
 FROM eclipse-temurin:21-jdk-jammy
 
-WORKDIR /app
-
-# Copy the backend directory first
-COPY backend backend/
-
-# Set JAVA_HOME explicitly
-ENV JAVA_HOME=/opt/java/openjdk
-ENV PATH="${JAVA_HOME}/bin:${PATH}"
-
-# Verify Java installation
-RUN java -version && \
-    echo "JAVA_HOME is set to: ${JAVA_HOME}"
-
-# Make scripts executable and build
-RUN cd backend && \
-    chmod +x mvnw && \
-    ./mvnw clean package -DskipTests && \
-    chmod +x start.sh
-
-# Set the working directory to backend
+# Create and set working directory
+RUN mkdir -p /app/backend
 WORKDIR /app/backend
 
-# Run the application using the startup script
-CMD ["./start.sh"] 
+# Copy only the necessary files first for better caching
+COPY backend/mvnw .
+COPY backend/.mvn .mvn
+COPY backend/pom.xml .
+
+# Make mvnw executable and download dependencies
+RUN chmod +x mvnw && \
+    ./mvnw dependency:go-offline
+
+# Copy the rest of the application
+COPY backend/src src/
+
+# Build the application
+RUN ./mvnw package -DskipTests
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"] 
