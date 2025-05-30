@@ -16,10 +16,11 @@ RUN java -version && \
 # Make scripts executable and build
 RUN cd backend && \
     chmod +x mvnw && \
-    ./mvnw clean package -DskipTests
+    ./mvnw clean package -DskipTests && \
+    chmod +x start.sh
 
 # Set the working directory to backend
 WORKDIR /app/backend
 
-# Run the application
-CMD ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"] 
+# Run the application using the startup script
+CMD ["./start.sh"] 
