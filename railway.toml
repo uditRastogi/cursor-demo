@@ -1,8 +1,11 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cd backend && ./mvnw clean package -DskipTests"
+buildCommand = "export JAVA_HOME=/nix/store/$(ls /nix/store | grep -m 1 openjdk-21) && cd backend && ./mvnw clean package -DskipTests"
 
 [deploy]
 startCommand = "cd backend && java -jar target/*.jar"
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10 
+restartPolicyMaxRetries = 10
+
+[variables]
+JAVA_HOME = "/nix/store/$(ls /nix/store | grep -m 1 openjdk-21)" 
