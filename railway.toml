@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "export JAVA_HOME=/nix/store/$(ls /nix/store | grep -m 1 openjdk-21) && cd backend && ./mvnw clean package -DskipTests"
+buildCommand = "cd backend && ./mvnw package -DskipTests"
 
 [deploy]
 startCommand = "cd backend && java -jar target/*.jar"

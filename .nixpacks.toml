@@ -1,12 +1,8 @@
 [phases.setup]
-nixPkgs = ['java-21']
-cmds = ['export JAVA_HOME="/nix/store/$(ls /nix/store | grep -m 1 openjdk-21)"']
+nixPkgs = ['openjdk21']
 
 [phases.build]
-cmds = [
-    'export JAVA_HOME="/nix/store/$(ls /nix/store | grep -m 1 openjdk-21)"',
-    'cd backend && ./mvnw clean package -DskipTests'
-]
+cmds = ['cd backend && ./mvnw package -DskipTests']
 
 [start]
 cmd = 'cd backend && java -jar target/*.jar'
