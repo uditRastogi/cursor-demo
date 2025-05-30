@@ -1,0 +1,252 @@
+<div class="board-container">
+    <div class="board-header">
+        <div class="board-title">
+            <h1>Board</h1>
+            <span class="subtitle">Daily Tasks</span>
+        </div>
+        <div class="board-actions">
+            <button class="filter-button" (click)="showFilters()">
+                <i class="fas fa-filter"></i>
+                Filters
+            </button>
+            <button class="create-task-button" (click)="openCreateTaskForm()">
+                <i class="fas fa-plus"></i>
+                Create task
+            </button>
+        </div>
+    </div>
+
+    <div class="board-columns">
+        <!-- Todo Column -->
+        <div class="board-column" 
+             (dragover)="$event.preventDefault()" 
+             (drop)="updateTaskStatus(JSON.parse($event.dataTransfer?.getData('text') || '{}'), TaskStatus.TODO)">
+            <div class="column-header">
+                <div class="header-title">
+                    <i class="fas fa-tasks"></i>
+                    <h2>Todo list</h2>
+                    <span class="task-count">{{getTodoTasks().length}}</span>
+                </div>
+                <div class="header-actions">
+                    <button class="add-task" (click)="openCreateTaskForm()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="more-options">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="task-list">
+                <div *ngFor="let task of getTodoTasks()" 
+                     class="task-card" 
+                     [class.completed]="task.completed"
+                     draggable="true"
+                     (dragstart)="$event.dataTransfer?.setData('text', JSON.stringify(task))">
+                    <div class="task-labels">
+                        <span class="label" [class]="task.type">{{task.type}}</span>
+                    </div>
+                    <h3 class="task-title">{{task.title}}</h3>
+                    <p class="task-description">{{task.description}}</p>
+                    <div class="task-meta">
+                        <div class="assignees">
+                            <div class="avatar" *ngFor="let assignee of task.assignees">
+                                <span>{{assignee.charAt(0)}}</span>
+                            </div>
+                        </div>
+                        <div class="task-metrics">
+                            <span class="metric">
+                                <i class="far fa-comment"></i>
+                                {{task.comments || 0}}
+                            </span>
+                            <span class="metric">
+                                <i class="fas fa-tasks"></i>
+                                {{task.subtasks || 0}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In Progress Column -->
+        <div class="board-column"
+             (dragover)="$event.preventDefault()" 
+             (drop)="updateTaskStatus(JSON.parse($event.dataTransfer?.getData('text') || '{}'), TaskStatus.IN_PROGRESS)">
+            <div class="column-header">
+                <div class="header-title">
+                    <i class="fas fa-spinner"></i>
+                    <h2>In Progress</h2>
+                    <span class="task-count">{{getInProgressTasks().length}}</span>
+                </div>
+                <div class="header-actions">
+                    <button class="more-options">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="task-list">
+                <div *ngFor="let task of getInProgressTasks()" 
+                     class="task-card"
+                     draggable="true"
+                     (dragstart)="$event.dataTransfer?.setData('text', JSON.stringify(task))">
+                    <div class="task-labels">
+                        <span class="label" [class]="task.type">{{task.type}}</span>
+                    </div>
+                    <h3 class="task-title">{{task.title}}</h3>
+                    <p class="task-description">{{task.description}}</p>
+                    <div class="progress-bar">
+                        <div class="progress" [style.width.%]="task.progress"></div>
+                    </div>
+                    <div class="task-meta">
+                        <div class="assignees">
+                            <div class="avatar" *ngFor="let assignee of task.assignees">
+                                <span>{{assignee.charAt(0)}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- In Review Column -->
+        <div class="board-column"
+             (dragover)="$event.preventDefault()" 
+             (drop)="updateTaskStatus(JSON.parse($event.dataTransfer?.getData('text') || '{}'), TaskStatus.IN_REVIEW)">
+            <div class="column-header">
+                <div class="header-title">
+                    <i class="fas fa-search"></i>
+                    <h2>In Review</h2>
+                    <span class="task-count">{{getInReviewTasks().length}}</span>
+                </div>
+                <div class="header-actions">
+                    <button class="more-options">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="task-list">
+                <div *ngFor="let task of getInReviewTasks()" 
+                     class="task-card"
+                     draggable="true"
+                     (dragstart)="$event.dataTransfer?.setData('text', JSON.stringify(task))">
+                    <div class="task-labels">
+                        <span class="label" [class]="task.type">{{task.type}}</span>
+                    </div>
+                    <h3 class="task-title">{{task.title}}</h3>
+                    <p class="task-description">{{task.description}}</p>
+                    <div class="progress-bar">
+                        <div class="progress" [style.width.%]="task.progress"></div>
+                    </div>
+                    <div class="task-meta">
+                        <div class="assignees">
+                            <div class="avatar" *ngFor="let assignee of task.assignees">
+                                <span>{{assignee.charAt(0)}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Done Column -->
+        <div class="board-column"
+             (dragover)="$event.preventDefault()" 
+             (drop)="updateTaskStatus(JSON.parse($event.dataTransfer?.getData('text') || '{}'), TaskStatus.DONE)">
+            <div class="column-header">
+                <div class="header-title">
+                    <i class="fas fa-check-circle"></i>
+                    <h2>Done</h2>
+                    <span class="task-count">{{getDoneTasks().length}}</span>
+                </div>
+                <div class="header-actions">
+                    <button class="more-options">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="task-list">
+                <div *ngFor="let task of getDoneTasks()" 
+                     class="task-card completed"
+                     draggable="true"
+                     (dragstart)="$event.dataTransfer?.setData('text', JSON.stringify(task))">
+                    <div class="task-labels">
+                        <span class="label" [class]="task.type">{{task.type}}</span>
+                    </div>
+                    <h3 class="task-title">{{task.title}}</h3>
+                    <p class="task-description">{{task.description}}</p>
+                    <div class="progress-bar">
+                        <div class="progress" [style.width.%]="task.progress"></div>
+                    </div>
+                    <div class="task-meta">
+                        <div class="assignees">
+                            <div class="avatar" *ngFor="let assignee of task.assignees">
+                                <span>{{assignee.charAt(0)}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <app-snake-game></app-snake-game>
+
+    <!-- Create Task Modal -->
+    <div class="modal" *ngIf="isCreateTaskFormVisible">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Task</h2>
+                <button class="close-button" (click)="closeCreateTaskForm()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form (ngSubmit)="createTask()" class="create-task-form">
+                <div class="form-group">
+                    <label for="taskType">Type</label>
+                    <select id="taskType" [(ngModel)]="newTask.type" name="type" class="form-control">
+                        <option value="website">#website</option>
+                        <option value="mobile-app">#mobile app</option>
+                        <option value="product">#product</option>
+                        <option value="development">#development</option>
+                        <option value="client">#client</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskStatus">Status</label>
+                    <select id="taskStatus" [(ngModel)]="newTask.status" name="status" class="form-control">
+                        <option [ngValue]="TaskStatus.TODO">Todo</option>
+                        <option [ngValue]="TaskStatus.IN_PROGRESS">In Progress</option>
+                        <option [ngValue]="TaskStatus.IN_REVIEW">In Review</option>
+                        <option [ngValue]="TaskStatus.DONE">Done</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="taskTitle">Title</label>
+                    <input type="text" id="taskTitle" [(ngModel)]="newTask.title" name="title" class="form-control" placeholder="Enter task title" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" [(ngModel)]="newTask.description" name="description" class="form-control" placeholder="Enter task description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Assignees</label>
+                    <div class="assignee-selector">
+                        <div class="selected-assignees">
+                            <div class="avatar" *ngFor="let assignee of newTask.assignees">
+                                <span>{{assignee.charAt(0)}}</span>
+                            </div>
+                        </div>
+                        <button type="button" class="add-assignee-button">
+                            <i class="fas fa-plus"></i>
+                            Add assignee
+                        </button>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-button" (click)="closeCreateTaskForm()">Cancel</button>
+                    <button type="submit" class="create-button">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 
