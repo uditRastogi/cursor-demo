@@ -1,8 +1,8 @@
 [phases.setup]
-nixPkgs = ['openjdk21']
+nixPkgs = ['openjdk21', 'bash']
 
 [phases.build]
-cmds = ['cd backend && ./mvnw package -DskipTests']
+cmds = ['cd backend && bash build.sh']
 
 [start]
 cmd = 'cd backend && java -jar target/*.jar'
